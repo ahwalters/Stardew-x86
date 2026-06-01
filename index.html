@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Stardew Stack</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game-container">
+
+        <header>
+            <h1>The Stardew Stack</h1>
+            <p class="subtitle">
+                Learning Calling Conventions Through Farming, Mining, and Befriending Villagers
+            </p>
+        </header>
+
+        <div class="info-box">
+            <h2>What Are Calling Conventions?</h2>
+            <p>
+                Calling conventions are the rules programs follow when functions call each other.
+                They decide:
+            </p>
+            <ul>
+                <li>How the CPU gets back to where it was (return address)</li>
+                <li>How local variables are preserved (callee-saved registers)</li>
+                <li>How parameters are passed (registers in 64-bit, stack in 32-bit)</li>
+                <li>How the stack frame is cleaned up (epilogue instructions)</li>
+                <li>What changes between 32-bit and 64-bit systems</li>
+            </ul>
+        </div>
+
+        <div class="farm-area">
+
+            <div class="scene-box">
+                <h2>Current Location</h2>
+                <div id="locationBox" class="location-box">Farm()</div>
+
+                <div class="button-grid">
+                    <button onclick="enterMines()">Enter MineFrame(1)</button>
+                    <button onclick="talkToAbigail()">talkToNPC(Abigail…)</button>
+                    <button onclick="returnFunction()">Return</button>
+                    <button onclick="toggleArchitecture()">Toggle 32/64-bit</button>
+                    <button onclick="causeSegfault()">Corrupt Stack</button>
+                    <button onclick="resetSimulation()">Reset</button>
+                </div>
+            </div>
+
+            <div class="stack-panel">
+                <h2>Call Stack</h2>
+                <div id="stackContainer" class="stack-container"></div>
+            </div>
+
+            <div class="register-panel">
+                <h2 id="registerTitle">64-bit Registers</h2>
+                <div id="registerContainer" class="register-container"></div>
+            </div>
+
+        </div>
+
+        <div class="bottom-row">
+
+            <div class="log-panel">
+                <h2>CPU Log</h2>
+                <div id="logBox" class="log-box"></div>
+            </div>
+
+            <div class="assembly-panel">
+                <h2>Assembly Instructions</h2>
+                <div id="assemblyCode" class="assembly-code"></div>
+            </div>
+
+        </div>
+
+        <div class="concept-panel">
+            <h2>How This Relates To Calling Conventions</h2>
+
+            <div class="concept-grid">
+
+                <div class="concept-card">
+                    <h3>Return Address</h3>
+                    <p>
+                        When you call a function, the CPU automatically pushes the current instruction pointer (RIP/EIP) onto the stack. On <strong>Return</strong>, the address is popped back into RIP which is how the CPU knows where to resume. 
+                    </p>
+                </div>
+
+                <div class="concept-card">
+                    <h3>Local Variables &amp; Callee-Saved Registers</h3>
+                    <p>
+                        Locals live below RBP in the frame (negative offsets). <strong>Callee-saved</strong> registers such as RBX, RBP, R12–R15 must be restored by the callee before returning. The caller trusts them to be unchanged. <strong>Caller-saved</strong> registers such as RAX, RDI, RSI, RDX, etc. may be overwritten by any call.
+                    </p>
+                </div>
+
+                <div class="concept-card">
+                    <h3>Parameter Passing</h3>
+                    <p>
+                        <strong>64-bit:</strong> first 6 integer args go in RDI, RSI, RDX, RCX, R8, R9 with no stack push needed. <strong>32-bit (cdecl):</strong> all args are pushed right-to-left, accessed at positive offsets from EBP inside the callee.
+                    </p>
+                </div>
+
+                <div class="concept-card">
+                    <h3>Stack Cleanup (Epilogue)</h3>
+                    <p>
+                        The epilogue reverses the prologue: <code>mov rsp, rbp</code> collapses locals, <code>pop rbp</code> restores the caller's base pointer, <code>ret</code> pops the return address. In 32-bit cdecl, the <em>caller</em> also runs <code>add esp, N</code> to remove pushed args.
+                    </p>
+                </div>
+
+                <div class="concept-card">
+                    <h3>32-bit vs 64-bit</h3>
+                    <p>
+                        64-bit has more registers, uses them for parameters, which is faster and avoids memory accesses, has 8-byte pointers, and requires 16-byte stack alignment before a call. 32-bit relies on the stack for everything and has only 4-byte pointers, so a maximum of 4 GB is addressable.                    </p>
+                </div>
+
+                <div class="concept-card">
+                    <h3>Why It Matters for Security</h3>
+                    <p>
+                        The predictable stack layout that makes calling conventions work also makes stack buffer overflows dangerous. An attacker who overflows a local buffer can overwrite the return address then <code>ret</code> jumps to attacker-controlled code.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
